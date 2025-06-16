@@ -2,99 +2,92 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Upcoming Tours</title>
+  <title>Events</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
   <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-  <style>
-    body {
-      background: #f8fafc;
-      font-family: sans-serif;
-    }
-    .swiper-button-next,
-    .swiper-button-prev {
-      color: #000;
-    }
-  </style>
 </head>
-<body>
-
-  <div class="swiper mySwiper px-4 py-8">
-    <div class="swiper-wrapper" id="card-container">
-      <!-- Cards will be injected here -->
-    </div>
-
-    <!-- Navigation buttons -->
-    <div class="swiper-button-next"></div>
-    <div class="swiper-button-prev"></div>
-  </div>
+<body class="bg-gray-100 p-4">
+  <div id="main-container" class="space-y-8"></div>
 
   <script>
-  const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSWDZmvcE2S6AXIp88WcZAnq26K8hvPLRRZEk3MXAB-RZmEmPz-0iiZC0dfFVYruWO8Iv0F4ByNkcwn/pub?gid=0&single=true&output=csv';
+    const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSWDZmvcE2S6AXIp88WcZAnq26K8hvPLRRZEk3MXAB-RZmEmPz-0iiZC0dfFVYruWO8Iv0F4ByNkcwn/pub?gid=0&single=true&output=csv';
 
-  fetch(sheetURL)
-    .then(res => res.text())
-    .then(text => {
-      const rows = text.trim().split('\n').slice(1);
-      const container = document.getElementById('card-container');
+    fetch(sheetURL)
+      .then(res => res.text())
+      .then(text => {
+        const rows = text.trim().split('\n').slice(1);
+        const grouped = {};
 
-      rows.forEach(row => {
-        const [main_category, media, title, price, date, location] = row.split(',');
+        rows.forEach(row => {
+          const [main_category, media, title, price, date, location] = row.split(',');
+          if (!grouped[main_category]) grouped[main_category] = [];
+          grouped[main_category].push({ media, title, price, date, location });
+        });
 
-        if (main_category.trim().toLowerCase() !== 'upcoming') return;
+        const container = document.getElementById('main-container');
 
-        const day = new Date(date).getDate();
-        const month = new Date(date).toLocaleString('default', { month: 'short' });
-
-        const card = document.createElement('div');
-        card.className = "swiper-slide bg-white rounded-xl shadow-md overflow-hidden w-[270px]";
-
-        card.innerHTML = `
-          <div class="relative h-[180px] w-full">
-            <img src="${media}" alt="${title}" class="w-full h-full object-cover" />
-            <div class="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded shadow-md">
-              ${day} ${month.toUpperCase()}
+        Object.entries(grouped).forEach(([category, items], index) => {
+          const sectionId = `swiper-${index}`;
+          const section = document.createElement('div');
+          section.innerHTML = `
+            <h2 class="text-xl font-semibold mb-2">${category}</h2>
+            <div class="swiper mySwiper" id="${sectionId}">
+              <div class="swiper-wrapper" id="${sectionId}-wrapper"></div>
+              <div class="swiper-button-next"></div>
+              <div class="swiper-button-prev"></div>
             </div>
-            <div class="absolute top-2 right-2 flex flex-col gap-2">
-              <button class="bg-white p-1 rounded-full shadow"><img src="https://img.icons8.com/ios-filled/20/000000/share.png"/></button>
-              <button class="bg-white p-1 rounded-full shadow"><img src="https://img.icons8.com/ios-filled/20/000000/checkmark.png"/></button>
-            </div>
-          </div>
-          <div class="p-3">
-            <h3 class="font-semibold text-sm leading-tight mb-1">${title}</h3>
-            <div class="text-green-600 font-bold text-sm mb-1">${price}</div>
-            <div class="text-gray-600 text-xs flex items-center mb-1">
-              <img src="https://img.icons8.com/ios-filled/12/000000/time.png" class="mr-1"/>
-              ${new Date(date).toLocaleString('default', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-            </div>
-            <div class="text-gray-600 text-xs flex items-center mb-1">
-              <img src="https://img.icons8.com/ios-filled/12/000000/marker.png" class="mr-1"/>
-              ${location}
-            </div>
-            <img src="https://public-pronto.s3.us-west-2.amazonaws.com/dev-assets/pronto-logo/ProntoliveNew.png" class="h-4 mt-2" />
-          </div>
-        `;
+          `;
+          container.appendChild(section);
 
-        container.appendChild(card);
+          const wrapper = section.querySelector('.swiper-wrapper');
+          items.forEach(({ media, title, price, date, location }) => {
+            const card = document.createElement('div');
+            card.className = "swiper-slide bg-white rounded-lg shadow-md overflow-hidden w-64";
+            card.innerHTML = `
+              <div class="relative">
+                <img src="${media}" alt="${title}" class="w-full h-40 object-cover" />
+                <div class="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded">
+                  ${date.split(',')[0]}
+                </div>
+                <div class="absolute top-2 right-2 flex flex-col space-y-1">
+                  <button class="bg-white p-1 rounded-full shadow"><img src="https://img.icons8.com/ios-filled/20/000000/share.png"/></button>
+                  <button class="bg-white p-1 rounded-full shadow"><img src="https://img.icons8.com/ios-filled/20/000000/checkmark.png"/></button>
+                </div>
+              </div>
+              <div class="p-3 text-sm">
+                <h3 class="font-semibold mb-1">${title}</h3>
+                <div class="text-green-700 font-bold mb-2">${price}</div>
+                <div class="text-gray-600 text-xs flex items-center mb-1">
+                  <img src="https://img.icons8.com/ios-filled/12/000000/time.png" class="mr-1"/>
+                  ${date}
+                </div>
+                <div class="text-gray-600 text-xs flex items-center">
+                  <img src="https://img.icons8.com/ios-filled/12/000000/marker.png" class="mr-1"/>
+                  ${location}
+                </div>
+                <img src="https://public-pronto.s3.us-west-2.amazonaws.com/dev-assets/pronto-logo/ProntoliveNew.png" class="h-5 mt-2" />
+              </div>
+            `;
+            wrapper.appendChild(card);
+          });
+
+          new Swiper(`#${sectionId}`, {
+            slidesPerView: 1.1,
+            spaceBetween: 10,
+            breakpoints: {
+              640: { slidesPerView: 2 },
+              768: { slidesPerView: 3 },
+              1024: { slidesPerView: 4.2 },
+            },
+            navigation: {
+              nextEl: `#${sectionId} .swiper-button-next`,
+              prevEl: `#${sectionId} .swiper-button-prev`
+            },
+          });
+        });
       });
-
-      new Swiper(".mySwiper", {
-        slidesPerView: 1.2,
-        spaceBetween: 12,
-        breakpoints: {
-          640: { slidesPerView: 2 },
-          768: { slidesPerView: 3 },
-          1024: { slidesPerView: 4.2 },
-        },
-        navigation: {
-          nextEl: ".swiper-button-next",
-          prevEl: ".swiper-button-prev"
-        },
-      });
-    });
-</script>
-
-
+  </script>
 </body>
 </html>
