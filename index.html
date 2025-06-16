@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upcoming Tours</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+  <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+  <style>
+    body {
+      background: #f8fafc;
+      font-family: sans-serif;
+    }
+    .swiper-button-next,
+    .swiper-button-prev {
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="swiper mySwiper px-4 py-8">
+    <div class="swiper-wrapper" id="card-container">
+      <!-- Cards will be injected here -->
+    </div>
+
+    <!-- Navigation buttons -->
+    <div class="swiper-button-next"></div>
+    <div class="swiper-button-prev"></div>
+  </div>
+
+  <script>
+    const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSWDZmvcE2S6AXIp88WcZAnq26K8hvPLRRZEk3MXAB-RZmEmPz-0iiZC0dfFVYruWO8Iv0F4ByNkcwn/pub?gid=0&single=true&output=csv';
+
+    fetch(sheetURL)
+      .then(res => res.text())
+      .then(text => {
+        const rows = text.trim().split('\n').slice(1);
+        const container = document.getElementById('card-container');
+
+        rows.forEach(row => {
+          const [main_category, media, title, price, date, location] = row.split(',');
+
+          if (main_category.trim().toLowerCase() !== 'upcoming') return;
+
+          const card = document.createElement('div');
+          card.className = "swiper-slide bg-white rounded-lg shadow-md overflow-hidden w-64";
+
+          card.innerHTML = `
+            <div class="relative">
+              <img src="${media}" alt="${title}" class="w-full h-40 object-cover" />
+              <div class="absolute top-2 left-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded">
+                ${date.split(',')[0]}
+              </div>
+              <div class="absolute top-2 right-2 flex flex-col space-y-1">
+                <button class="bg-white p-1 rounded-full shadow">
+                  <img src="https://img.icons8.com/ios-filled/20/000000/share.png" alt="share"/>
+                </button>
+                <button class="bg-white p-1 rounded-full shadow">
+                  <img src="https://img.icons8.com/ios-filled/20/000000/checkmark.png" alt="check"/>
+                </button>
+              </div>
+            </div>
+            <div class="p-3 text-sm">
+              <h3 class="font-semibold mb-1">${title}</h3>
+              <div class="text-green-700 font-bold mb-2">${price}</div>
+              <div class="text-gray-600 text-xs flex items-center mb-1">
+                <img src="https://img.icons8.com/ios-filled/12/000000/time.png" class="mr-1" alt="time"/>
+                ${date}
+              </div>
+              <div class="text-gray-600 text-xs flex items-center">
+                <img src="https://img.icons8.com/ios-filled/12/000000/marker.png" class="mr-1" alt="location"/>
+                ${location}
+              </div>
+              <img src="https://public-pronto.s3.us-west-2.amazonaws.com/dev-assets/pronto-logo/ProntoliveNew.png" class="h-5 mt-2" alt="pronto-logo"/>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+
+        new Swiper(".mySwiper", {
+          slidesPerView: 1.1,
+          spaceBetween: 10,
+          breakpoints: {
+            640: { slidesPerView: 2 },
+            768: { slidesPerView: 3 },
+            1024: { slidesPerView: 4.2 }
+          },
+          navigation: {
+            nextEl: ".swiper-button-next",
+            prevEl: ".swiper-button-prev"
+          }
+        });
+      });
+  </script>
+
+</body>
+</html>
