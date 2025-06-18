@@ -7,6 +7,37 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
   <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+  <style>
+    .swiper-button-next,
+    .swiper-button-prev {
+      background-color: black;
+      border-radius: 9999px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .swiper-button-next::after,
+    .swiper-button-prev::after {
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .swiper-button-next:hover,
+    .swiper-button-prev:hover {
+      background-color: #facc15; /* Tailwind yellow-400 */
+    }
+
+    .swiper-button-next:hover::after,
+    .swiper-button-prev:hover::after {
+      color: black;
+    }
+  </style>
 </head>
 <body class="bg-gray-100 p-4">
   <div id="main-container" class="space-y-8"></div>
